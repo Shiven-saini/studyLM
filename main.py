@@ -7,7 +7,7 @@ from PyPDF2 import PdfReader
 # with open("test.txt") as f:
 #     test_content = f.read()
 
-pdf_path = "Shiven-Resume.pdf"
+pdf_path = "database/1-Letter-to-god.pdf"
 reader = PdfReader(pdf_path)
 
 test_content = ""
@@ -16,22 +16,27 @@ for page in reader.pages:
     if text:
         test_content += text + "\n"  # Add newline between pages
 
-# text_splitter = RecursiveCharacterTextSplitter(
-#     chunk_size=100,
-#     chunk_overlap=20,
-#     length_function=len,
-#     is_separator_regex=False
-# )
-
-text_splitter = CharacterTextSplitter(
-    separator="\n\n",
-    chunk_size=1000,
-    chunk_overlap=200,
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=100,
+    chunk_overlap=20,
     length_function=len,
-    is_separator_regex=False,
+    is_separator_regex=False
 )
 
+# text_splitter = CharacterTextSplitter(
+#     separator="\n\n",
+#     chunk_size=2000,
+#     chunk_overlap=200,
+#     length_function=len,
+#     is_separator_regex=False,
+# )
+
 texts = text_splitter.create_documents([test_content])
+
+
+
+
+
 
 file = open("test-split.txt", "w")
 
@@ -43,7 +48,13 @@ file.close()
 
 embedding_model=OllamaEmbeddings(model="nomic-embed-text:latest")
 
-vector_store = Chroma.from_documents(texts, embedding_model)
+vector_store = Chroma.from_documents(
+    texts, 
+    embedding_model,
+    collection_name="example_collection",
+    persist_directory="chroma_store"
+    )
+
 chat_model = ChatOllama(model="gemma3:4b")
 
 while True:
